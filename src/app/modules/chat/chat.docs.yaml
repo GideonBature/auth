@@ -1,0 +1,595 @@
+openapi: 3.0.0
+info:
+    title: User API
+    version: 1.0.0
+
+paths:
+    /user/verify-bvn:
+        post:
+            summary: Verify BVN (Bank Verification Number)
+            tags: [User]
+            security:
+                - customAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/BvnVerificationInput'
+            responses:
+                '200':
+                    description: BVN verification successful
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/BankVerification'
+                '404':
+                    description: User not found
+                '409':
+                    description: Conflict - All fields are required
+                '500':
+                    description: Internal server error
+        get:
+            tags: [User]
+            security:
+                - customAuth: []
+            summary: Get All Cards
+            description: Retrieves all cards associated with the user's account.
+            responses:
+                '200':
+                    description: All cards retrieved successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetAllCardsResponse'
+                '401':
+                    $ref: '#/components/responses/Unauthorized'
+                '404':
+                    $ref: '#/components/responses/NotFound'
+                '500':
+                    $ref: '#/components/responses/InternalServerError'
+
+    /user/get-user-profile:
+        get:
+            summary: Get User Profile
+            tags: [User]
+            security:
+                - customAuth: []
+            responses:
+                '200':
+                    description: Retrieve user profile successful
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/GetUserProfileResponse'
+                '401':
+                    description: Unauthorized - Token is missing or invalid
+                '404':
+                    description: User not found
+    /user/update-user-profile:
+        patch:
+            summary: Update User Profile
+            tags: [User]
+            security:
+                - customAuth: []
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/UpdateUserProfileRequest'
+            responses:
+                '200':
+                    description: User information updated successfully
+                    content:
+                        application/json:
+                            schema:
+                                $ref: '#/components/schemas/UpdateUserProfileResponse'
+                '401':
+                    description: Unauthorized - Token is missing or invalid
+                '404':
+                    description: User not found
+                '400':
+                    description: Bad request - Invalid input data
+
+components:
+    VerificationStatusResponse:
+        type: object
+        properties:
+            userVerification:
+                type: boolean
+                example: true
+            bankVerification:
+                type: boolean
+                example: true
+            identityVerification:
+                type: boolean
+                example: true
+            proofOfAddress:
+                type: boolean
+                example: false
+            nextOfKin:
+                type: boolean
+                example: true
+            transactionPin:
+                type: boolean
+                example: true
+
+    SetTransactionPinInput:
+        type: object
+        properties:
+            pin:
+                type: string
+                example: '1234'
+            confirmPin:
+                type: string
+                example: '1234'
+        required:
+            - pin
+            - confirmPin
+
+    schemas:
+        BvnVerificationInput:
+            type: object
+            properties:
+                bvn:
+                    type: string
+                    example: '12345678901'
+                gender:
+                    type: string
+                    enum: ['male', 'female']
+                    example: 'male'
+                dateOfBirth:
+                    type: string
+                    format: date
+                    example: '1990-01-01'
+            required:
+                - bvn
+                - gender
+                - dateOfBirth
+
+        IdVerificationInput:
+            type: object
+            properties:
+                documentType:
+                    type: string
+                    enum: ['international_passport', 'driver_license', 'voter_id']
+                    example: 'driver_license'
+                idNumber:
+                    type: string
+                    example: 'A1234567'
+                image:
+                    type: string
+            required:
+                - documentType
+                - idNumber
+                - image
+
+        ProofOfAddressInput:
+            type: object
+            properties:
+                address:
+                    type: string
+                    example: '123 Main St'
+                state:
+                    type: string
+                    example: 'Lagos'
+                localGovernment:
+                    type: string
+                    example: 'Ikeja'
+                city:
+                    type: string
+                    example: 'Lagos'
+                documentType:
+                    type: string
+                    enum: ['electricity_bill', 'water_bill', 'waste_bil', 'cable_bill']
+                    example: 'electricity_bill'
+                image:
+                    type: string
+            required:
+                - address
+                - state
+                - localGovernment
+                - city
+                - documentType
+                - image
+
+        NextOfKinInput:
+            type: object
+            properties:
+                firstName:
+                    type: string
+                    example: 'John'
+                lastName:
+                    type: string
+                    example: 'Doe'
+                gender:
+                    type: string
+                    enum: ['male', 'female']
+                    example: 'male'
+                relationship:
+                    type: string
+                    example: 'brother'
+                phone:
+                    type: string
+                    example: '+2348012345678'
+                email:
+                    type: string
+                    example: 'john.doe@example.com'
+                address:
+                    type: string
+                    example: '123 Main St, Lagos'
+            required:
+                - firstName
+                - lastName
+                - gender
+                - relationship
+                - phone
+                - email
+                - address
+
+        BankVerification:
+            type: object
+            properties:
+                id:
+                    type: string
+                    example: 'vb5352c-cc414c-1cdcd55'
+                bvn:
+                    type: string
+                    example: '12345678901'
+                gender:
+                    type: string
+                    enum: ['male', 'female']
+                    example: 'male'
+                dateOfBirth:
+                    type: string
+                    format: date
+                    example: '1990-01-01'
+                isVerified:
+                    type: boolean
+                    example: true
+                userId:
+                    type: string
+                    example: 'vb5352c-cc414c-1cdcd55'
+
+        IdentityVerification:
+            type: object
+            properties:
+                id:
+                    type: string
+                    example: 'vb5352c-cc414c-1cdcd55'
+                documentType:
+                    type: string
+                    enum: ['international_passport', 'driver_license', 'voter_id']
+                    example: 'passport'
+                idNumber:
+                    type: string
+                    example: 'A1234567'
+                image:
+                    type: string
+                    format: binary
+                isVerified:
+                    type: boolean
+                    example: true
+                userId:
+                    type: string
+                    example: 'vb5352c-cc414c-1cdcd55'
+
+        ProofOfAddress:
+            type: object
+            properties:
+                id:
+                    type: string
+                    example: 'vb5352c-cc414c-1cdcd55'
+                address:
+                    type: string
+                    example: '123 Main St'
+                state:
+                    type: string
+                    example: 'Lagos'
+                localGovernment:
+                    type: string
+                    example: 'Ikeja'
+                city:
+                    type: string
+                    example: 'Lagos'
+                documentType:
+                    type: string
+                    enum: ['electricity_bill', 'water_bill', 'waste_bil', 'cable_bill']
+                    example: 'electricity_bill'
+                image:
+                    type: string
+                    format: binary
+                isVerified:
+                    type: boolean
+                    example: true
+                userId:
+                    type: string
+                    example: 'vb5352c-cc414c-1cdcd55'
+
+        NextOfKin:
+            type: object
+            properties:
+                id:
+                    type: string
+                    example: 'vb5352c-cc414c-1cdcd55'
+                firstName:
+                    type: string
+                    example: 'John'
+                lastName:
+                    type: string
+                    example: 'Doe'
+                gender:
+                    type: string
+                    enum: ['male', 'female']
+                    example: 'male'
+                relationship:
+                    type: string
+                    example: 'brother'
+                phone:
+                    type: string
+                    example: '+2348012345678'
+                email:
+                    type: string
+                    example: 'john.doe@example.com'
+                address:
+                    type: string
+                    example: '123 Main St, Lagos'
+                isVerified:
+                    type: boolean
+                    example: true
+                userId:
+                    type: string
+                    example: 'vb5352c-cc414c-1cdcd55'
+
+        AddCardInput:
+            type: object
+            properties:
+                cardNumber:
+                    type: string
+                    example: '4111111111111111'
+                expiryDate:
+                    type: string
+                    example: '12/25'
+                cardHolderName:
+                    type: string
+                    example: 'John Doe'
+                cvv:
+                    type: string
+                    example: '123'
+            required:
+                - cardNumber
+                - expiryDate
+                - cardHolderName
+                - cvv
+
+        AddMoneyInput:
+            type: object
+            properties:
+                amount:
+                    type: number
+                    example: 5000
+            required:
+                - amount
+
+        Card:
+            type: object
+            properties:
+                id:
+                    type: string
+                    example: 'card12345'
+                cardNumber:
+                    type: string
+                    example: '4111111111111111'
+                expiryDate:
+                    type: string
+                    example: '12/25'
+                cardHolderName:
+                    type: string
+                    example: 'John Doe'
+                userId:
+                    type: string
+                    example: 'user12345'
+
+        Transaction:
+            type: object
+            properties:
+                id:
+                    type: string
+                    example: 'trans12345'
+                amount:
+                    type: number
+                    example: 5000
+                userId:
+                    type: string
+                    example: 'user12345'
+                transactionType:
+                    type: string
+                    example: 'Credit'
+                status:
+                    type: string
+                    example: 'Success'
+                accountName:
+                    type: string
+                    example: 'ABC'
+                bankName:
+                    type: string
+                    example: 'ABC'
+                bankAccount:
+                    type: string
+                    example: '1234'
+                narration:
+                    type: string
+                    example: 'Card'
+                sessionId:
+                    type: string
+                    example: '55526841025'
+                transactionId:
+                    type: string
+                    example: '541241284541'
+        AddCardRequest:
+            type: object
+            properties:
+                cardNumber:
+                    type: string
+                expiryDate:
+                    type: string
+                cardHolderName:
+                    type: string
+                cvv:
+                    type: string
+            required:
+                - cardNumber
+                - expiryDate
+                - cardHolderName
+                - cvv
+
+        CardResponse:
+            type: object
+            properties:
+                id:
+                    type: string
+                cardNumber:
+                    type: string
+                expiryDate:
+                    type: string
+                cardHolderName:
+                    type: string
+                userAccountId:
+                    type: string
+
+        RemoveCardResponse:
+            type: object
+            properties:
+                success:
+                    type: boolean
+                message:
+                    type: string
+
+        GetAllCardsResponse:
+            type: object
+            properties:
+                cards:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/CardResponse'
+
+        GetUserProfileResponse:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    example: 200
+                success:
+                    type: boolean
+                    example: true
+                message:
+                    type: string
+                    example: 'User information retrieved successfully'
+                data:
+                    type: object
+                    properties:
+                        id:
+                            type: string
+                            example: '99abb7da-8ca5-4d4a-a55c-a396f22db932'
+                        fullName:
+                            type: string
+                            example: 'karim Udding'
+                        email:
+                            type: string
+                            format: email
+                            example: 'user@mail.com'
+                        phone:
+                            type: string
+                            example: '01712345678'
+                        profile:
+                            type: object
+                            properties:
+                                address:
+                                    type: string
+                                    example: '456 Elm Street'
+                                city:
+                                    type: string
+                                    example: 'hello world'
+                                state:
+                                    type: string
+                                    example: 'New York'
+                                dateOfBirth:
+                                    type: string
+                                    format: date-time
+                                    example: '2024-10-10T18:00:00.000Z'
+                                gender:
+                                    type: string
+                                    example: 'Female'
+                                studentCategory:
+                                    type: string
+                                    example: 'Graduate Student'
+                                universityAttended:
+                                    type: string
+                                    example: 'Stanford University'
+                                yearOfGraduation:
+                                    type: string
+                                    example: '2023'
+                                nigeriaLawSchoolCurrentlyAt:
+                                    type: string
+                                    example: 'Abuja Campus'
+
+        UpdateUserProfileResponse:
+            type: object
+            properties:
+                statusCode:
+                    type: integer
+                    example: 200
+                success:
+                    type: boolean
+                    example: true
+                message:
+                    type: string
+                    example: 'User information updated successfully'
+                data:
+                    type: object
+        
+        UpdateUserProfileRequest:
+            type: object
+            properties:
+                fullName:
+                    type: string
+                    example: "John Doe"
+                email:
+                    type: string
+                    format: email
+                    example: "john.doe@example.com"
+                phone:
+                    type: string
+                    example: "01712345678"
+                address:
+                    type: string
+                    example: "123 Maple Avenue"
+                city:
+                    type: string
+                    example: "Springfield"
+                state:
+                    type: string
+                    example: "California"
+                dateOfBirth:
+                    type: string
+                    format: date
+                    example: "1990-01-01"
+                gender:
+                    type: string
+                    example: "Female"
+                studentCategory:
+                    type: string
+                    example: "Graduate Student"
+                universityAttended:
+                    type: string
+                    example: "Stanford University"
+                yearOfGraduation:
+                    type: string
+                    example: "2023"
+                nigeriaLawSchoolCurrentlyAt:
+                    type: string
+                    example: "Abuja Campus"
+                level:
+                    type: string
+                    example: "Level 4"

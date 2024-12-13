@@ -1,0 +1,208 @@
+components:
+    responses:
+        '500':
+            description: 'Internal Server Error'
+            content:
+                'application/json':
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                                example: false
+                            statusCode:
+                                type: integer
+                                format: int32
+                                example: 500
+                            error:
+                                type: string
+                                example: internalServerError
+                            errorName:
+                                type: string
+                                example: 'Internal Server Error'
+                            errorMessages:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        path:
+                                            type: string
+                                            example: Server
+                                        message:
+                                            type: string
+                                            example: Internal Server Error
+        '400':
+            description: 'Bad Request'
+            content:
+                'application/json':
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                                example: false
+                            statusCode:
+                                type: integer
+                                format: int32
+                                example: 400
+                            error:
+                                type: string
+                                example: badRequest
+                            errorName:
+                                type: string
+                                enum:
+                                    - Validation Error
+                                    - Zod Error
+                                    - Prisma Client Validation Error
+                                    - Prisma Client Known Request Error
+                                    - Prisma Client Unknown Request Error
+                                    - Prisma Client Rust Panic
+                                    - Prisma Client Initialization Error
+
+                                example: 'Zod Error'
+                            errorMessages:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        path:
+                                            type: string
+                                            example: email
+                                        message:
+                                            type: string
+                                            example: Invalid email
+
+        '401':
+            description: Unauthorized
+            content:
+                'application/json':
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                                example: false
+                            statusCode:
+                                type: integer
+                                format: int32
+                                example: 401
+                            error:
+                                type: string
+                                example: unauthorized
+                            errorName:
+                                type: string
+                                example: 'Authorization error'
+                                enum:
+                                    - Authorization error
+                                    - Authentication error
+                                    - Invalid credentials
+                                    - Jason Web Token error
+                                    - Token expired error
+
+                            errorMessages:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        path:
+                                            type: string
+                                            example: token or key
+                                        message:
+                                            type: string
+                                            example: You don't have the right permissions
+
+        '403':
+            description: Forbidden
+            content:
+                'application/json':
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                                example: false
+                            statusCode:
+                                type: integer
+                                format: int32
+                                example: 403
+                            error:
+                                type: string
+                                example: forbidden
+                            errorName:
+                                type: string
+                                example: 'Forbidden Error'
+                            errorMessages:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        path:
+                                            type: string
+                                            example: token or key
+                                        message:
+                                            type: string
+                                            example: You don't have access to this resource
+
+        '404':
+            description: Resource Not Found
+            content:
+                'application/json':
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                                example: false
+                            statusCode:
+                                type: integer
+                                format: int32
+                                example: 404
+                            error:
+                                type: string
+                                example: notFound
+                            errorName:
+                                type: string
+                                example: Resource not found
+                            errorMessages:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        path:
+                                            type: string
+                                            example: '/your-path'
+                                        message:
+                                            type: string
+                                            example: 404! Url doest not exist
+
+        '409':
+            description: Conflict
+            content:
+                'application/json':
+                    schema:
+                        type: object
+                        properties:
+                            success:
+                                type: boolean
+                                example: false
+                            statusCode:
+                                type: integer
+                                format: int32
+                                example: 409
+                            error:
+                                type: string
+                                example: conflict
+                            errorName:
+                                type: string
+                                example: 'Conflict Error'
+                            errorMessages:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        path:
+                                            type: string
+                                            example: email or username or users provided data
+                                        message:
+                                            type: string
+                                            example: resource already exists

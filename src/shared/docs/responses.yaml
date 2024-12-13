@@ -1,0 +1,85 @@
+components:
+    schemas:
+        '200':
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                statusCode:
+                    type: integer
+                    format: int32
+                    example: 200
+
+        '200/resource':
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                statusCode:
+                    type: integer
+                    format: int32
+                    example: 200
+                message:
+                    type: string
+                    example: 'resource fetched successfully!'
+        '200/resources':
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                statusCode:
+                    type: integer
+                    format: int32
+                    example: 200
+                message:
+                    type: string
+                    example: 'resources fetched successfully!'
+        '201':
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                statusCode:
+                    type: integer
+                    format: int32
+                    example: 201
+                message:
+                    type: string
+                    example: 'resource created successfully!'
+
+        '204':
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                statusCode:
+                    type: integer
+                    format: int32
+                    example: 204
+                message:
+                    type: string
+                    example: 'resource deleted successfully!'
+        '204/logout':
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                statusCode:
+                    type: integer
+                    format: int32
+                    example: 204
+                message:
+                    type: string
+                    example: 'user logged out successfully!'
+        'updated':
+            properties:
+                success:
+                    type: boolean
+                    example: true
+                statusCode:
+                    type: integer
+                    format: int32
+                    example: 200
+                message:
+                    type: string
+                    example: 'resource updated successfully!'
