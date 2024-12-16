@@ -13,7 +13,7 @@
         "lint:fix": "eslint . --ext js,jsx,ts,tsx --fix",
         "prettier:fix": "prettier --write .",
         "prod": "NODE_ENV=production nodemon server.js",
-        "postinstall": "prisma generate",
+        "postinstall": "prisma format && prisma generate",
         "prepare": "husky install",
         "test": "jest",
         "start": "node dist/server.js"

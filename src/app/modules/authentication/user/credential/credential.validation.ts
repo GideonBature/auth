@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { UserRole } from '../../../../../shared/enums';
 
 const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,100}$/;
 // const phoneNumberRegex = /^(234|017|018|019|016|015|014|013)\d{8}$/;
@@ -37,7 +38,13 @@ export const gettingStartUserZodSchema = z.object({
                 .trim()
                 .min(3, 'last Name too short - should be 3 chars minimum')
                 .max(100, 'last Name too long - should be 100 chars maximum'),
-
+            
+            role: z.enum([
+                UserRole.ADMIN,
+                UserRole.BUYER,
+                UserRole.SELLER
+            ]),
+            
             password: z
                 .string({
                     required_error: 'Password is required',
@@ -63,6 +70,96 @@ export const gettingStartUserZodSchema = z.object({
                 path: ['password', 'confirmPassword'],
             }
         ),
+});
+
+export const sellerInfoZodSchema = z.object({
+    body: z.object({
+        email: z
+            .string({
+                required_error: 'Email is required',
+            })
+            .email({
+                message: 'Invalid email format.',
+            })
+            .trim(),
+        address: z
+            .string({
+                required_error: 'address is required',
+            })
+            .trim()
+            .min(3, 'address too short - should be 3 chars minimum')
+            .max(100, 'address too long - should be 100 chars maximum'),
+        city: z
+            .string({
+                required_error: 'city is required',
+            })
+            .trim()
+            .min(3, 'city too short - should be 3 chars minimum')
+            .max(100, 'city too long - should be 100 chars maximum'),
+        state: z
+            .string({
+                required_error: 'city is required',
+            })
+            .trim()
+            .min(3, 'city too short - should be 3 chars minimum')
+            .max(100, 'city too long - should be 100 chars maximum'),
+        dateOfBirth: z.preprocess((val) => {
+            // convert string to date object
+            return typeof val === 'string' ? new Date(val) : val;
+        }, z.date()),
+        gender: z
+            .string({
+                required_error: 'gender is required',
+            })
+            .trim()
+            .min(1, 'gender too short - should be 1 chars minimum')
+            .max(10, 'gender too long - should be 10 chars maximum'),
+    }),
+});
+
+export const buyerInfoZodSchema = z.object({
+    body: z.object({
+        email: z
+            .string({
+                required_error: 'Email is required',
+            })
+            .email({
+                message: 'Invalid email format.',
+            })
+            .trim(),
+        address: z
+            .string({
+                required_error: 'address is required',
+            })
+            .trim()
+            .min(3, 'address too short - should be 3 chars minimum')
+            .max(100, 'address too long - should be 100 chars maximum'),
+        city: z
+            .string({
+                required_error: 'city is required',
+            })
+            .trim()
+            .min(3, 'city too short - should be 3 chars minimum')
+            .max(100, 'city too long - should be 100 chars maximum'),
+        state: z
+            .string({
+                required_error: 'state is required',
+            })
+            .trim()
+            .min(3, 'state too short - should be 3 chars minimum')
+            .max(100, 'state too long - should be 100 chars maximum'),
+        dateOfBirth: z.preprocess((val) => {
+            // convert string to date object
+            return typeof val === 'string' ? new Date(val) : val;
+        }, z.date()),
+        gender: z
+            .string({
+                required_error: 'gender is required',
+            })
+            .trim()
+            .min(1, 'gender too short - should be 1 chars minimum')
+            .max(10, 'gender too long - should be 10 chars maximum'),
+    }),
 });
 
 export const emailVerificationSchema = z.object({

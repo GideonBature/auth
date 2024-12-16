@@ -11,21 +11,24 @@ datasource db {
 }
 
 model User {
-  id                         String          @id @default(uuid())
-  email                      String          @unique
-  phone                      String?         @unique
+  id                         String    @id @default(uuid())
+  email                      String    @unique
+  phone                      String?   @unique
+  role                       UserRoles @default(buyer)
   password                   String?
   firstName                  String
   lastName                   String
   profileImage               String?
-  isVerified                 Boolean         @default(false)
-  createdAt                  DateTime        @default(now())
-  updatedAt                  DateTime        @updatedAt
+  isVerified                 Boolean   @default(false)
+  createdAt                  DateTime  @default(now())
+  updatedAt                  DateTime  @updatedAt
+  profile                    Profile?
   emailVerificationCode      String?
   emailVerificationExpiresAt DateTime?
-  emailNotification          Boolean         @default(true)
-  textNotification           Boolean         @default(true)
+  emailNotification          Boolean   @default(true)
+  textNotification           Boolean   @default(true)
   refreshToken               String[]
+  Seller                     Seller?
 }
 
 model GettingStartedUser {
@@ -38,6 +41,39 @@ model GettingStartedUser {
   emailVerificationCode      String?
   emailVerificationExpiresAt DateTime?
   isVerified                 Boolean   @default(false)
+  role                       UserRoles @default(buyer)
   createdAt                  DateTime  @default(now())
   updatedAt                  DateTime  @updatedAt
+}
+
+model Profile {
+  id          String    @id @default(uuid())
+  address     String?
+  city        String?
+  state       String?
+  dateOfBirth DateTime?
+  gender      String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  userId      String    @unique
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Seller {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  description    String?
+  keywords       String?
+  sellerServices String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum UserRoles {
+  admin
+  buyer
+  seller
 }

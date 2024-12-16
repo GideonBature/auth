@@ -8,6 +8,8 @@ import { CredentialSharedServices } from './credential.shared';
 import {
     TEmailOtpSend,
     TForgetPasswordInput,
+    TBuyerInfo,
+    TSellerInfo,
     TPartialUserRegisterInput,
     TResetPasswordInput,
     TUserLoginInput,
@@ -42,6 +44,28 @@ export class CredentialControllers {
             statusCode: httpStatus.CREATED,
             success: true,
             message: 'email verification successfully!',
+            data: result as Omit<User, 'password'>,
+        });
+    }
+
+    async addBuyerInfo(req: Request, res: Response): Promise<void> {
+        const result = await this.credentialServices.addBuyerInfo(req.body as TBuyerInfo);
+
+        responseHandler<Omit<User, 'password'>>(res, {
+            statusCode: httpStatus.CREATED,
+            success: true,
+            message: 'buyer account created successfully!',
+            data: result as Omit<User, 'password'>,
+        });
+    }
+
+    async addSellerInfo(req: Request, res: Response): Promise<void> {
+        const result = await this.credentialServices.addSellerInfo(req.body as TSellerInfo);
+
+        responseHandler<Omit<User, 'password'>>(res, {
+            statusCode: httpStatus.CREATED,
+            success: true,
+            message: 'seller account created successfully!',
             data: result as Omit<User, 'password'>,
         });
     }

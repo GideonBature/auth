@@ -1,5 +1,5 @@
 /* eslint-disable class-methods-use-this */
-import { GettingStartedUser, User } from '@prisma/client';
+import { GettingStartedUser, User, UserRoles } from '@prisma/client';
 import crypto from 'crypto';
 import httpStatus from 'http-status';
 import { JsonWebTokenError, JwtPayload } from 'jsonwebtoken';
@@ -7,6 +7,7 @@ import bcrypt from 'bcrypt';
 
 import {
     HandleApiError,
+    UserRole,
     configs,
     errorNames,
     // exclude,
@@ -23,12 +24,13 @@ import {
     TUserLoginInput,
     TUserLoginResponse,
     TEmailVerification,
+    TSellerInfo,
+    TBuyerInfo,
 } from './credential.types';
 
 const {
     findPartialUserByEmail,
     findUserByPhoneNumber,
-    // findUserByToken,
     findUserByEmail,
     findUserById,
     updateUserByEmail,
@@ -131,11 +133,12 @@ export class CredentialServices {
     emailVerification = async (user: TEmailVerification): Promise<object | null> => {
         console.log('🌼 🔥🔥 CredentialServices 🔥🔥 createUser= 🔥🔥 user🌼', user);
 
+        const userExists = await findUserByEmail(user.email);
         const partialUser = await findPartialUserByEmail(user.email);
         console.log('🌼 🔥🔥 CredentialServices 🔥🔥 createUser= 🔥🔥 partialUser🌼', partialUser);
 
         // user non existence check
-        if (!partialUser) {
+        if (!userExists) {
             throw new HandleApiError(
                 errorNames.CONFLICT,
                 httpStatus.CONFLICT,
@@ -167,6 +170,38 @@ export class CredentialServices {
             );
         }
 
+        if (partialUser.role === 'seller') {
+            const { firstName, lastName, email, phone, password } = partialUser;
+
+            const deleteGettingStartedUser = await prisma.gettingStartedUser.delete({
+                where: {
+                    email: user.email,
+                },
+            });
+
+            if (!deleteGettingStartedUser) {
+                throw new HandleApiError(
+                    errorNames.CONFLICT,
+                    httpStatus.CONFLICT,
+                    'Failed to delete partial user'
+                );
+            }
+
+            const createdUser = await prisma.user.create({
+                data: {
+                    firstName,
+                    lastName,
+                    email,
+                    phone,
+                    password,
+                    role: 'seller',
+                    isVerified: true,
+                },
+            });
+            console.log('🚀 ~ CredentialServices ~ createUser= ~ createdUser:', createdUser);
+            return createdUser;
+        }
+
         const verifiedPartialUser = await prisma.gettingStartedUser.update({
             where: {
                 email: user.email,
@@ -176,6 +211,120 @@ export class CredentialServices {
             },
         });
         return verifiedPartialUser;
+    };
+
+    addSellerInfo = async (data: TSellerInfo): Promise<object | null> => {
+        console.log('🌼 🔥🔥 CredentialServices 🔥🔥 addUserInfo= 🔥🔥 user🌼', data);
+        const partialUser = await findPartialUserByEmail(data.email);
+        // if user role is not lawyer
+        if (partialUser?.role !== UserRoles.seller) {
+            throw new HandleApiError(
+                errorNames.VALIDATION_ERROR,
+                httpStatus.UNPROCESSABLE_ENTITY,
+                'user role is not seller!'
+            );
+        }
+        console.log('🌼 🔥🔥 CredentialServices 🔥🔥 addUserInfo= 🔥🔥 partialUser🌼', partialUser);
+        if (partialUser?.isVerified) {
+            const createdUser = await prisma.user.create({
+                data: {
+                    email: data.email,
+                    password: partialUser.password,
+                    role: UserRole.SELLER,
+                    phone: partialUser.phone,
+                    isVerified: true,
+                    firstName: partialUser.firstName,
+                    lastName: partialUser.lastName,
+                },
+            });
+            console.log('🚀 ~ CredentialServices ~ addSellerInfo= ~ createdUser:', createdUser);
+
+            const createProfile = await prisma.profile.create({
+                data: {
+                    userId: createdUser.id,
+                    address: data.address,
+                    city: data.city,
+                    state: data.state,
+                    dateOfBirth: new Date(data.dateOfBirth),
+                    gender: data.gender,
+                },
+            });
+            console.log('🚀 ~ addSellerInfo= ~ createProfile:', createProfile);
+            const deleteGettingStartedUser = await prisma.gettingStartedUser.delete({
+                where: {
+                    email: data.email,
+                },
+            });
+            console.log(
+                '🚀 ~ addSellerInfo= ~ deleteGettingStartedUser:',
+                deleteGettingStartedUser
+            );
+            return createdUser;
+        }
+        throw new HandleApiError(
+            "verification Failed, user isn't verified",
+            httpStatus.UNAUTHORIZED,
+            'user is not verified!'
+        );
+    };
+
+    addBuyerInfo = async (data: TBuyerInfo): Promise<object | null> => {
+        console.log('🌼 🔥🔥 CredentialServices 🔥🔥 addUserInfo= 🔥🔥 user🌼', data);
+        const partialUser = await findPartialUserByEmail(data.email);
+        console.log('🌼 🔥🔥 CredentialServices 🔥🔥 addUserInfo= 🔥🔥 partialUser🌼', partialUser);
+        // if user role is not lawyer
+        if (partialUser?.role !== UserRoles.buyer) {
+            throw new HandleApiError(
+                errorNames.VALIDATION_ERROR,
+                httpStatus.UNPROCESSABLE_ENTITY,
+                'user role is not buyer!'
+            );
+        }
+        let createdUser = null;
+        if (partialUser?.isVerified) {
+            await prisma.$transaction(async (tx) => {
+                createdUser = await tx.user.create({
+                    data: {
+                        email: data.email,
+                        password: partialUser.password,
+                        role: UserRole.BUYER,
+                        phone: partialUser.phone,
+                        isVerified: true,
+                        firstName: partialUser.firstName,
+                        lastName: partialUser.lastName,
+                    },
+                });
+                console.log('🚀 ~ CredentialServices ~ addBuyerInfo= ~ createdUser:', createdUser);
+
+                const createProfile = await tx.profile.create({
+                    data: {
+                        userId: createdUser.id,
+                        address: data.address,
+                        city: data.city,
+                        state: data.state,
+                        dateOfBirth: new Date(data.dateOfBirth),
+                        gender: data.gender,
+                    },
+                });
+                console.log('🚀 ~ addBuyerInfo= ~ createProfile:', createProfile);
+                const deleteGettingStartedUser = await tx.gettingStartedUser.delete({
+                    where: {
+                        email: data.email,
+                    },
+                });
+                console.log(
+                    '🚀 ~ addSellerInfo= ~ deleteGettingStartedUser:',
+                    deleteGettingStartedUser
+                );
+            });
+
+            return createdUser;
+        }
+        throw new HandleApiError(
+            "verification Failed, user isn't verified",
+            httpStatus.UNAUTHORIZED,
+            'user is not verified!'
+        );
     };
 
     loginUser = async (loginInput: TUserLoginInput): Promise<TUserLoginResponse | null> => {

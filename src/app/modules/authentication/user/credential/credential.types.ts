@@ -1,5 +1,5 @@
-import { GettingStartedUser, User } from '@prisma/client';
-// import { UserRole } from '../../../../../shared';
+import { GettingStartedUser, Profile, User, UserRoles } from '@prisma/client';
+import { UserRole } from '../../../../../shared';
 
 export type TPartialUserRegisterInput = {
     email: string;
@@ -8,11 +8,30 @@ export type TPartialUserRegisterInput = {
     phoneNumber: string;
     password: string;
     confirmPassword: string;
+    role: UserRole;
 };
 
 export type TEmailVerification = {
     email: string;
     emailVerificationCode: string;
+};
+
+export type TSellerInfo = {
+    email: string;
+    address: string;
+    city: string;
+    state: string;
+    dateOfBirth: string;
+    gender: string;
+};
+
+export type TBuyerInfo = {
+    email: string;
+    address: string;
+    city: string;
+    state: string;
+    dateOfBirth: string;
+    gender: string;
 };
 
 export type TForgetPasswordInput = {
@@ -35,11 +54,14 @@ export type TEmailOtpSend = {
 export type TUserLoginInput = {
     email: string;
     password: string;
+    role?: UserRole;
 };
 
 export type TPartialUser = GettingStartedUser;
 
-export type TUser = User;
+export type TUserWithProfile = User & {
+    profile?: Profile | null;
+};
 
 export type TUserLoginResponse = {
     userExists: User;

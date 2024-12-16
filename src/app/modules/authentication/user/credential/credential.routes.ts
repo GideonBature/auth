@@ -9,6 +9,8 @@ import {
     refreshTokenZodSchema,
     emailVerificationSchema,
     resetPasswordZodSchema,
+    buyerInfoZodSchema,
+    sellerInfoZodSchema,
 } from './credential.validation';
 
 const router = Router();
@@ -21,6 +23,8 @@ const {
     forgetPasswordOtpSend,
     refreshAccessToken,
     changePassword,
+    addBuyerInfo,
+    addSellerInfo,
 } = credentialModules.credentialControllers;
 
 router.post(
@@ -32,6 +36,16 @@ router.post(
     '/email-verification',
     zodValidator(emailVerificationSchema),
     asyncHandler(createUser.bind(credentialModules))
+);
+router.post(
+    '/add-buyer-info',
+    zodValidator(buyerInfoZodSchema),
+    asyncHandler(addBuyerInfo.bind(credentialModules))
+);
+router.post(
+    '/add-seller-info',
+    zodValidator(sellerInfoZodSchema),
+    asyncHandler(addSellerInfo.bind(credentialModules))
 );
 router.post(
     '/login',

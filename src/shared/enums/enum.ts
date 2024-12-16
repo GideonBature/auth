@@ -1,8 +1,7 @@
 export enum UserRole {
-    LAWYER = 'lawyer',
-    LAW_STUDENT = 'lawStudent',
-    BUSINESS = 'business',
     ADMIN = 'admin',
+    BUYER = 'buyer',
+    SELLER = 'seller',
 }
 
 export enum AdminPermissions {
