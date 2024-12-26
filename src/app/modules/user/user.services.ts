@@ -9,7 +9,8 @@ export class UserServices {
             where: { id: userId },
             select: {
                 id: true,
-                fullName: true,
+                firstName: true,
+                lastName: true,
                 email: true,
                 phone: true,
                 profile: {
@@ -19,10 +20,6 @@ export class UserServices {
                         state: true,
                         dateOfBirth: true,
                         gender: true,
-                        studentCategory: true,
-                        universityAttended: true,
-                        yearOfGraduation: true,
-                        nigeriaLawSchoolCurrentlyAt: true,
                     },
                 },
             },
@@ -37,7 +34,8 @@ export class UserServices {
 
     async updateUserProfile(userId: string, input: TUpdateUserProfileInput): Promise<object> {
         const {
-            fullName,
+            firstName,
+            lastName,
             email,
             phone,
             address,
@@ -45,30 +43,18 @@ export class UserServices {
             state,
             dateOfBirth,
             gender,
-            studentCategory,
-            universityAttended,
-            yearOfGraduation,
-            nigeriaLawSchoolCurrentlyAt,
-            level,
-            businessName,
-            businessDescription,
-            businessEmail,
-            businessSector,
-            businessAddress,
             emailNotification,
             textNotification,
-            description,
-            keywords,
-            lawServices,
         } = input;
         console.log('🚀 ~ SearchServices ~ updateUserProfile ~ input:', input);
 
         // Update the User fields if any are provided in input
-        if (fullName || email || phone || emailNotification || textNotification) {
+        if (firstName || lastName || email || phone || emailNotification || textNotification) {
             await prisma.user.update({
                 where: { id: userId },
                 data: {
-                    ...(fullName && { fullName }),
+                    ...(firstName && { firstName }),
+                    ...(lastName && { lastName }),
                     ...(email && { email }),
                     ...(phone && { phone }),
                     ...(emailNotification && { emailNotification }),
@@ -89,16 +75,6 @@ export class UserServices {
             ...(state && { state }),
             ...(dateOfBirth && { dateOfBirth: new Date(dateOfBirth) }),
             ...(gender && { gender }),
-            ...(studentCategory && { studentCategory }),
-            ...(universityAttended && { universityAttended }),
-            ...(yearOfGraduation && { yearOfGraduation }),
-            ...(nigeriaLawSchoolCurrentlyAt && { nigeriaLawSchoolCurrentlyAt }),
-            ...(level && { level }),
-            ...(businessName && { businessName }),
-            ...(businessDescription && { businessDescription }),
-            ...(businessEmail && { businessEmail }),
-            ...(businessSector && { businessSector }),
-            ...(businessAddress && { businessAddress }),
         };
 
         // Update or create Profile based on whether it already exists
@@ -120,37 +96,37 @@ export class UserServices {
             }
         }
 
-        const lawyer = await prisma.lawyer.findUnique({
+        const seller = await prisma.seller.findUnique({
             where: { userId },
         });
 
         // Prepare lawyer data based on input
-        const lawyerData = {
-            ...(description && { description }),
-            ...(keywords && { keywords }),
-            ...(lawServices && { lawServices }),
-        };
+        // const sellerData = {
+        //     ...(description && { description }),
+        //     ...(keywords && { keywords }),
+        //     ...(lawServices && { lawServices }),
+        // };
 
         // Update or create Lawyer based on whether it already exists
-        if (Object.keys(lawyerData).length > 0) {
-            if (lawyer) {
-                const hello = await prisma.lawyer.update({
-                    where: { userId },
-                    data: lawyerData,
-                });
-                console.log('🚀 ~ SearchServices ~ updateUserProfile ~ hello:', hello);
-            } else {
-                const afdasdf = await prisma.lawyer.create({
-                    data: {
-                        ...lawyerData,
-                        user: {
-                            connect: { id: userId },
-                        },
-                    },
-                });
-                console.log('🚀 ~ SearchServices ~ updateUserProfile ~ afdasdf:', afdasdf);
-            }
-        }
+        // if (Object.keys(lawyerData).length > 0) {
+        //     if (lawyer) {
+        //         const hello = await prisma.lawyer.update({
+        //             where: { userId },
+        //             data: lawyerData,
+        //         });
+        //         console.log('🚀 ~ SearchServices ~ updateUserProfile ~ hello:', hello);
+        //     } else {
+        //         const afdasdf = await prisma.lawyer.create({
+        //             data: {
+        //                 ...lawyerData,
+        //                 user: {
+        //                     connect: { id: userId },
+        //                 },
+        //             },
+        //         });
+        //         console.log('🚀 ~ SearchServices ~ updateUserProfile ~ afdasdf:', afdasdf);
+        //     }
+        // }
 
         return {};
     }
